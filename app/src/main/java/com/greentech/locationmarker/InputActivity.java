@@ -18,8 +18,6 @@ public class InputActivity extends AppCompatActivity {
 
     Intent resultIntent;
 
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -29,6 +27,15 @@ public class InputActivity extends AppCompatActivity {
         et_info = (EditText) findViewById(R.id.et_info);
         et_building = (EditText) findViewById(R.id.et_building);
 
+        StringBuilder l_string = new StringBuilder();
+
+        l_string.append("Longitude: ");
+        l_string.append(getIntent().getStringExtra("lng"));
+        l_string.append("\n");
+        l_string.append("Latitude: ");
+        l_string.append(getIntent().getStringExtra("lat"));
+
+        tv_location.setText(l_string.toString());
     }
 
     public void onAddClick(View view) {

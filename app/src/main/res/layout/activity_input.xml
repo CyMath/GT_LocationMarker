@@ -14,24 +14,26 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/tv_location"
+            android:textSize="18dp"
+            android:text="Location: "/>
+
         <EditText
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/et_info"
-            android:text="Info"/>
+            android:hint="Info"/>
 
         <EditText
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/et_building"
-            android:text="Building"/>
+            android:hint="Building"/>
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/tv_location"
-            android:textScaleX="1.2"
-            android:text="Location: "/>
+
 
         <Button
             android:layout_width="match_parent"

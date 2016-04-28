@@ -15,6 +15,11 @@ import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
+import android.widget.ListAdapter;
+import android.widget.ListView;
+import android.widget.SimpleAdapter;
 import android.widget.Toast;
 
 import com.cocoahero.android.geojson.Feature;
@@ -35,7 +40,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 public class MainActivity extends AppCompatActivity implements
         GoogleApiClient.ConnectionCallbacks,
@@ -55,6 +63,10 @@ public class MainActivity extends AppCompatActivity implements
     private Location mCurrentLocation;
     LocationRequest mLocationRequest;
     JSONArray jArray;
+    ArrayList<String> listOfMarkedLocations;
+
+    ListView list;
+    ListAdapter adapter;
 
     /**
      * Tracks the status of the location updates request. Value changes when the user presses the
@@ -98,6 +110,16 @@ public class MainActivity extends AppCompatActivity implements
         String path = gFile.getAbsolutePath();
 
         jArray = new JSONArray();
+        listOfMarkedLocations = new ArrayList<String>();
+
+        readFile();
+
+        list = (ListView) findViewById(R.id.lv_main);
+
+        adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, listOfMarkedLocations);
+
+        list.setAdapter(adapter);
+
 
         mLocationClient = new GoogleApiClient.Builder(getApplicationContext())
                 .addApi(LocationServices.API)
@@ -118,12 +140,17 @@ public class MainActivity extends AppCompatActivity implements
             public void onClick(View view) {
 
                 Intent intent = new Intent(getApplicationContext(), InputActivity.class);
+                Bundle giveBundle = new Bundle();
 
                 if (mCurrentLocation != null) {
-                    longitude = mCurrentLocation.getLatitude();
-                    latitude = mCurrentLocation.getLongitude();
+                    longitude = mCurrentLocation.getLongitude();
+                    latitude = mCurrentLocation.getLatitude();
+
+                    giveBundle.putString("lng",  Double.toString(longitude));
+                    giveBundle.putString("lat", Double.toString(latitude));
                 }
 
+                intent.putExtras(giveBundle);
                 startActivityForResult(intent, REQUEST_ADD_LOCATION);
 
             }
@@ -214,45 +241,45 @@ public class MainActivity extends AppCompatActivity implements
                     buildingInput = data.getExtras().getString("Building");
 
                     location = new Point(longitude, latitude);
-                    Feature feature = new Feature(location);
+                    JSONObject geoEntry = createGEntry(infoInput, buildingInput, location);
 
-                    JSONObject jObject = new JSONObject();
-                    JSONObject geoJSON = new JSONObject();
+                    StringBuilder saveString = new StringBuilder();
 
-                    try
-                    {
-                        jObject.put("name", infoInput);
-                        jObject.put("building", buildingInput);
-                    }
-                    catch (JSONException e) {
-                        e.printStackTrace();
-                    }
+                    saveString.append(listOfMarkedLocations.size()+1 + "\n");
+                    saveString.append(infoInput + " \n");
+                    saveString.append(buildingInput);
 
-                    feature.setProperties(jObject);
-
-                    try {
-                        geoJSON = feature.toJSON();
-
-                    }
-                    catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-
-                    jArray.put(geoJSON);
+                    jArray.put(geoEntry);
+                    listOfMarkedLocations.add(saveString.toString());
 
                     try {
                         writeToFile(jArray);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-
-                    // The user picked a contact.
-                    // The Intent's data Uri identifies which contact was selected.
-
-                    // Do something with the contact here (bigger example below)
                 }
                 break;
         }
+    }
+
+    private JSONObject createGEntry(String info, String building, Point location)
+    {
+        Feature feature = new Feature(location);
+        JSONObject jObject = new JSONObject();
+        JSONObject geoEntry = new JSONObject();
+
+        try
+        {
+            jObject.put("name", info);
+            jObject.put("building", building);
+            feature.setProperties(jObject);
+            geoEntry = feature.toJSON();
+        }
+        catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return geoEntry;
     }
 
     private void writeToFile(JSONArray gArray) throws IOException
@@ -264,7 +291,7 @@ public class MainActivity extends AppCompatActivity implements
         Toast.makeText(this, "Added", Toast.LENGTH_SHORT).show();
     }
 
-    private void readFile() throws JSONException
+    private void readFile()
     {
         try {
 
@@ -285,11 +312,32 @@ public class MainActivity extends AppCompatActivity implements
             for (int i = 0; i < gArray.length(); i++) {
                 String name = gArray.getJSONObject(i).getJSONObject("properties").getString("name");
                 String building = gArray.getJSONObject(i).getJSONObject("properties").getString("building");
+                String tmpPoint = gArray.getJSONObject(i).getJSONObject("geometry").getString("coordinates");
+
+                tmpPoint = tmpPoint.replace("[", "");
+                tmpPoint = tmpPoint.replace("]", "");
+                String[] point = tmpPoint.split(",");
+
+                Point location = new Point(Double.parseDouble(point[0]), Double.parseDouble(point[1]));
+
+                StringBuilder saveString = new StringBuilder();
+
+                saveString.append(listOfMarkedLocations.size()+1 + "\n");
+                saveString.append(name + " \n");
+                saveString.append(building);
+
+                JSONObject gEntry = createGEntry(name, building, location);
+                jArray.put(gEntry);
+                listOfMarkedLocations.add(saveString.toString());
             }
         }
         catch (IOException e)
         {
             Toast.makeText(this, "No JSON File", Toast.LENGTH_SHORT).show();
+        }
+        catch (JSONException e)
+        {
+            e.getStackTrace();
         }
 
     }
@@ -309,7 +357,9 @@ public class MainActivity extends AppCompatActivity implements
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_upload) {
+            Intent intent = new Intent(this, GDriveActivity.class);
+            startActivity(intent);
             return true;
         }
 
@@ -324,12 +374,6 @@ public class MainActivity extends AppCompatActivity implements
         // location updates if the user has requested them.
         if (mLocationClient.isConnected() && mRequestingLocationUpdates) {
             startLocationUpdates();
-        }
-
-        try {
-            readFile();
-        } catch (JSONException e) {
-            e.printStackTrace();
         }
     }
 
