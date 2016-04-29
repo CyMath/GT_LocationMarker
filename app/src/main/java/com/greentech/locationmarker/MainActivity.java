@@ -57,6 +57,7 @@ public class MainActivity extends AppCompatActivity implements
     final static int REQUEST_ADD_LOCATION = 0x2;
     Point location;
 
+    static int count;
     String locationInput, infoInput, buildingInput;
     double longitude, latitude;
 
@@ -95,14 +96,15 @@ public class MainActivity extends AppCompatActivity implements
      * The fastest rate for active location updates. Exact. Updates will never be more frequent
      * than this value.
      */
-    public static final long FASTEST_INTERVAL =
-            UPDATE_INTERVAL / 2;
+    public static final long FASTEST_INTERVAL = UPDATE_INTERVAL / 2;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        count = 0;
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -121,6 +123,8 @@ public class MainActivity extends AppCompatActivity implements
         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+                listOfMarkedLocations
 
             }
         });
@@ -246,7 +250,7 @@ public class MainActivity extends AppCompatActivity implements
                     buildingInput = data.getExtras().getString("Building");
 
                     location = new Point(longitude, latitude);
-                    JSONObject geoEntry = createGEntry(infoInput, buildingInput, location);
+                    JSONObject geoEntry = createGEntry(count, infoInput, buildingInput, location);
                     jArray.put(geoEntry);
 
                     StringBuilder saveString = new StringBuilder();
@@ -265,7 +269,7 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
-    private JSONObject createGEntry(String info, String building, Point location)
+    private JSONObject createGEntry(int id, String info, String building, Point location)
     {
         Feature feature = new Feature(location);
         JSONObject jObject = new JSONObject();
@@ -273,6 +277,7 @@ public class MainActivity extends AppCompatActivity implements
 
         try
         {
+            feature.setIdentifier(Integer.toString(count));
             jObject.put("name", info);
             jObject.put("building", building);
             feature.setProperties(jObject);
@@ -326,14 +331,14 @@ public class MainActivity extends AppCompatActivity implements
                 String[] point = tmpPoint.split(",");
 
                 Point location = new Point(Double.parseDouble(point[0]), Double.parseDouble(point[1]));
+                count += 1;
+                JSONObject gEntry = createGEntry(count, name, building, location);
 
                 StringBuilder saveString = new StringBuilder();
 
                 saveString.append(listOfMarkedLocations.size()+1 + "\n");
                 saveString.append(name + " \n");
                 saveString.append(building);
-
-                JSONObject gEntry = createGEntry(name, building, location);
                 jArray.put(gEntry);
                 listOfMarkedLocations.add(saveString.toString());
             }
