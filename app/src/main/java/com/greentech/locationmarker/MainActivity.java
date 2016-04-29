@@ -8,7 +8,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -17,10 +16,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.BaseAdapter;
 import android.widget.ListAdapter;
 import android.widget.ListView;
-import android.widget.SimpleAdapter;
 import android.widget.Toast;
 
 import com.cocoahero.android.geojson.Feature;
@@ -39,12 +36,9 @@ import org.json.JSONObject;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 public class MainActivity extends AppCompatActivity implements
         GoogleApiClient.ConnectionCallbacks,
@@ -55,6 +49,7 @@ public class MainActivity extends AppCompatActivity implements
 
 
     final static int REQUEST_ADD_LOCATION = 0x2;
+    final static int REQUEST_EDIT_LOCATION = 0x3;
     Point location;
 
     static int count;
@@ -68,7 +63,7 @@ public class MainActivity extends AppCompatActivity implements
     ArrayList<String> listOfMarkedLocations;
 
     ListView list;
-    ListAdapter adapter;
+    ArrayAdapter listAdapter;
 
     /**
      * Tracks the status of the location updates request. Value changes when the user presses the
@@ -118,13 +113,28 @@ public class MainActivity extends AppCompatActivity implements
         readFile();
 
         list = (ListView) findViewById(R.id.lv_main);
-        adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, listOfMarkedLocations);
-        list.setAdapter(adapter);
+        listAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, listOfMarkedLocations);
+        list.setAdapter(listAdapter);
         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
-                listOfMarkedLocations
+                Intent intent = new Intent(getApplicationContext(), EditActivity.class);
+                Bundle bundle = new Bundle();
+
+                try {
+                    bundle.putString("location", jArray.getJSONObject(position).getJSONObject("geometry").getString("coordinates"));
+                    bundle.putInt("Position", position);
+                }
+                catch(JSONException e)
+                {
+                    e.printStackTrace();
+                }
+
+                bundle.putString("Info", listOfMarkedLocations.get(position).toString());
+
+                intent.putExtras(bundle);
+                startActivityForResult(intent, REQUEST_EDIT_LOCATION);
 
             }
         });
@@ -255,18 +265,35 @@ public class MainActivity extends AppCompatActivity implements
 
                     StringBuilder saveString = new StringBuilder();
 
-                    saveString.append(listOfMarkedLocations.size()+1 + "\t");
+                    saveString.append(listOfMarkedLocations.size()+1 + "\t\t");
                     saveString.append(infoInput + " \n");
-                    saveString.append("\t" + buildingInput);
+                    saveString.append("\t\t" + buildingInput);
 
                     listOfMarkedLocations.add(saveString.toString());
+                    listAdapter.notifyDataSetChanged();
 
                     writeToFile(jArray);
                     Toast.makeText(this, "Added", Toast.LENGTH_SHORT).show();
 
                 }
                 break;
+
+            case REQUEST_EDIT_LOCATION:
+                if (resultCode == RESULT_OK) {
+
+                    int position = data.getIntExtra("Position", 0);
+                    listOfMarkedLocations.remove(position);
+                    count--;
+
+                    listAdapter.notifyDataSetChanged();
+                    jArray.remove(position);
+                    writeToFile(jArray);
+
+
+                }
+                break;
         }
+
     }
 
     private JSONObject createGEntry(int id, String info, String building, Point location)
@@ -336,9 +363,9 @@ public class MainActivity extends AppCompatActivity implements
 
                 StringBuilder saveString = new StringBuilder();
 
-                saveString.append(listOfMarkedLocations.size()+1 + "\n");
+                saveString.append(listOfMarkedLocations.size()+1 + "\t\t");
                 saveString.append(name + " \n");
-                saveString.append(building);
+                saveString.append("\t\t" + building);
                 jArray.put(gEntry);
                 listOfMarkedLocations.add(saveString.toString());
             }

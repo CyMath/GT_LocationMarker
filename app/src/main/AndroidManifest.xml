@@ -22,6 +22,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".InputActivity" />
+        <activity android:name=".EditActivity" />
         <activity
             android:name=".GDriveActivity"
             android:label="@string/title_google_drive_activity"
