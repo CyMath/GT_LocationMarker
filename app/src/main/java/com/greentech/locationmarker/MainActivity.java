@@ -40,6 +40,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 
+/**
+    Made by Cyril Mathew
+    For Use with Green Tech App
+*/
+
 public class MainActivity extends AppCompatActivity implements
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
@@ -259,7 +264,7 @@ public class MainActivity extends AppCompatActivity implements
                     infoInput = data.getExtras().getString("Info");
                     buildingInput = data.getExtras().getString("Building");
 
-                    location = new Point(longitude, latitude);
+                    location = new Point(latitude, longitude);
                     JSONObject geoEntry = createGEntry(count, infoInput, buildingInput, location);
                     jArray.put(geoEntry);
 

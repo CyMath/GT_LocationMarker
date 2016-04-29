@@ -3,6 +3,8 @@
     <string name="action_upload">Upload to Google Drive</string>
     <string name="title_google_drive_activity">Google Drive</string>
 
+    <string name="google_app_id">489341522200-eq3mssuhr2a5kfmlvoub8pihumnrlt4m.apps.googleusercontent.com</string>
+
     <string-array name="floors_array">
         <item>1st Floor</item>
         <item>2nd Floor</item>

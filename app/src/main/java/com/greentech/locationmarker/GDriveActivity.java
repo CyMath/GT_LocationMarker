@@ -44,6 +44,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 
 /**
+    Customized by Cyril Mathew
+    For Use with Green Tech App
+*/
+
+
+/**
  * Android Drive Quickstart activity. This activity takes a photo and saves it
  * in Google Drive. The user is prompted with a pre-made dialog which allows
  * them to choose the file location.

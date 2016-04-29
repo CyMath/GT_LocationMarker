@@ -8,8 +8,9 @@ import android.os.Bundle;
 import android.util.Log;
 
 /**
- * Created by Matias on 4/29/16.
- */
+    Made by Cyril Mathew
+    For Use with Green Tech App
+*/
 
 public class DeleteDialogFragment extends DialogFragment {
     EditActivity returnActivity;

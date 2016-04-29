@@ -14,6 +14,11 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+/**
+    Made by Cyril Mathew
+    For Use with Green Tech App
+*/
+
 public class EditActivity extends AppCompatActivity {
 
     private TextView tv_info;
