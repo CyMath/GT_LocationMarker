@@ -15,6 +15,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.ListAdapter;
@@ -115,10 +116,14 @@ public class MainActivity extends AppCompatActivity implements
         readFile();
 
         list = (ListView) findViewById(R.id.lv_main);
-
         adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, listOfMarkedLocations);
-
         list.setAdapter(adapter);
+        list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+            }
+        });
 
 
         mLocationClient = new GoogleApiClient.Builder(getApplicationContext())
@@ -242,14 +247,14 @@ public class MainActivity extends AppCompatActivity implements
 
                     location = new Point(longitude, latitude);
                     JSONObject geoEntry = createGEntry(infoInput, buildingInput, location);
+                    jArray.put(geoEntry);
 
                     StringBuilder saveString = new StringBuilder();
 
-                    saveString.append(listOfMarkedLocations.size()+1 + "\n");
+                    saveString.append(listOfMarkedLocations.size()+1 + "\t");
                     saveString.append(infoInput + " \n");
-                    saveString.append(buildingInput);
+                    saveString.append("\t" + buildingInput);
 
-                    jArray.put(geoEntry);
                     listOfMarkedLocations.add(saveString.toString());
 
                     writeToFile(jArray);

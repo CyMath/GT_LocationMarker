@@ -2,4 +2,17 @@
     <string name="app_name">Location Marker</string>
     <string name="action_upload">Upload to Google Drive</string>
     <string name="title_google_drive_activity">Google Drive</string>
+
+    <string-array name="floors_array">
+        <item>1st Floor</item>
+        <item>2nd Floor</item>
+        <item>3rd Floor</item>
+        <item>Basement</item>
+    </string-array>
+
+    <string-array name="type_array">
+        <item>Recycling Bin</item>
+        <item>Water Refill</item>
+    </string-array>
+
 </resources>
