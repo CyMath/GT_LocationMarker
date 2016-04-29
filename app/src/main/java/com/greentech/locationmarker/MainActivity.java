@@ -252,11 +252,9 @@ public class MainActivity extends AppCompatActivity implements
                     jArray.put(geoEntry);
                     listOfMarkedLocations.add(saveString.toString());
 
-                    try {
-                        writeToFile(jArray);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+                    writeToFile(jArray);
+                    Toast.makeText(this, "Added", Toast.LENGTH_SHORT).show();
+
                 }
                 break;
         }
@@ -282,13 +280,17 @@ public class MainActivity extends AppCompatActivity implements
         return geoEntry;
     }
 
-    private void writeToFile(JSONArray gArray) throws IOException
+    private void writeToFile(JSONArray gArray)
     {
-        FileOutputStream fos = openFileOutput("geoJSON.json", MODE_PRIVATE);
-        fos.write(gArray.toString().getBytes());
-        fos.close();
-
-        Toast.makeText(this, "Added", Toast.LENGTH_SHORT).show();
+        try{
+            FileOutputStream fos = openFileOutput("geoJSON.json", MODE_PRIVATE);
+            fos.write(gArray.toString().getBytes());
+            fos.close();
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
     }
 
     private void readFile()
